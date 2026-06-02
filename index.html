@@ -228,17 +228,42 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 </head>
 <body>
 
-<!-- 온보딩: 첫 실행 시 약국명 입력 -->
-<div id="onboarding" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#6d5efc,#8b7cff);color:#fff;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:var(--sans)">
-  <div style="font-size:44px;margin-bottom:10px">💊</div>
-  <div style="font-size:22px;font-weight:800;margin-bottom:6px">약국 재고관리</div>
-  <div style="font-size:13px;opacity:.85;margin-bottom:26px">처음 오셨네요! 약국 이름을 입력해주세요.</div>
-  <input id="onboardName" placeholder="예: 수원스타약국" maxlength="30"
-    style="width:min(360px,90%);padding:14px 16px;border:none;border-radius:12px;font-size:16px;text-align:center;outline:none;color:#222"
-    autocomplete="off" onkeydown="if(event.key==='Enter')savePharmacyName()">
-  <button onclick="savePharmacyName()"
-    style="margin-top:14px;width:min(360px,90%);padding:14px;border:none;border-radius:12px;background:#fff;color:#6d5efc;font-size:16px;font-weight:800;cursor:pointer">시작하기</button>
-  <div style="font-size:10px;opacity:.6;margin-top:20px;max-width:320px;line-height:1.5">입력한 약국명은 화면 상단에 표시됩니다.</div>
+<!-- 로그인 / 회원가입 / 비밀번호찾기 -->
+<div id="auth" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#6d5efc,#8b7cff);flex-direction:column;align-items:center;justify-content:center;padding:20px;font-family:var(--sans);overflow:auto">
+  <div style="font-size:40px">💊</div>
+  <div style="font-size:21px;font-weight:800;color:#fff;margin:6px 0 16px">약국 재고관리</div>
+  <div style="background:#fff;color:#222;width:min(380px,94%);border-radius:16px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.25)">
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <button id="tab-login" onclick="authTab('login')" style="flex:1;padding:10px;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;background:#6d5efc;color:#fff">로그인</button>
+      <button id="tab-signup" onclick="authTab('signup')" style="flex:1;padding:10px;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;background:#eee;color:#666">회원가입</button>
+    </div>
+
+    <div id="view-login">
+      <input id="li-id" placeholder="아이디" autocomplete="username" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
+      <input id="li-pw" type="password" placeholder="비밀번호" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
+      <button onclick="doLogin()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#6d5efc;color:#fff;font-size:15px;font-weight:800;cursor:pointer">로그인</button>
+      <div style="text-align:center;margin-top:12px"><span onclick="authTab('reset')" style="font-size:12px;color:#6d5efc;cursor:pointer">비밀번호 찾기</span></div>
+    </div>
+
+    <div id="view-signup" style="display:none">
+      <input id="su-name" placeholder="약국명 (예: 수원스타약국)" maxlength="30" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:6px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
+      <div style="font-size:11px;color:#e11;margin:0 0 10px;line-height:1.45">⚠️ 약국명을 <b>정확하게</b> 입력하세요. 비밀번호를 잃어버렸을 때 찾기에 필요합니다.</div>
+      <input id="su-id" placeholder="아이디" autocomplete="username" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
+      <input id="su-pw" type="password" placeholder="비밀번호" autocomplete="new-password" onkeydown="if(event.key==='Enter')doSignup()" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
+      <button onclick="doSignup()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#6d5efc;color:#fff;font-size:15px;font-weight:800;cursor:pointer">가입하고 시작하기</button>
+    </div>
+
+    <div id="view-reset" style="display:none">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px">비밀번호 재설정</div>
+      <input id="rs-id" placeholder="아이디" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
+      <input id="rs-name" placeholder="약국명 (가입 때 입력한 그대로)" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
+      <input id="rs-pw" type="password" placeholder="새 비밀번호" onkeydown="if(event.key==='Enter')doReset()" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
+      <button onclick="doReset()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#6d5efc;color:#fff;font-size:15px;font-weight:800;cursor:pointer">비밀번호 변경</button>
+      <div style="text-align:center;margin-top:12px"><span onclick="authTab('login')" style="font-size:12px;color:#888;cursor:pointer">← 로그인으로</span></div>
+    </div>
+
+    <div id="auth-msg" style="min-height:16px;font-size:12px;color:#e11;text-align:center;margin-top:10px"></div>
+  </div>
 </div>
 
 <div class="header">
@@ -554,30 +579,76 @@ function getBarcodeVariants(barcode) {
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
-// ── 범용판: 약국명 온보딩 ──
-function showOnboarding() {
-  const ob = document.getElementById('onboarding');
-  if (ob) ob.style.display = 'flex';
-  setTimeout(() => { const i = document.getElementById('onboardName'); if (i) i.focus(); }, 100);
-}
+// ── 범용판: 계정(로그인/회원가입/비번찾기) ──
+const AUTH_URL = 'https://script.google.com/macros/s/AKfycbw7ltHTsXWZtEEP2MpremcoCcUdiUYdqEryTQxmuN_WznIel-1KErKVp1Nr8u2JFjQNdw/exec';
+
 function applyPharmacyName(name) {
   const el = document.getElementById('logoName');
   if (el) el.textContent = name + ' 재고관리';
   document.title = name + ' 재고관리';
 }
-function savePharmacyName() {
-  const v = (document.getElementById('onboardName').value || '').trim();
-  if (!v) { showToast('약국 이름을 입력해주세요', 'err'); return; }
-  localStorage.setItem('app_pharmacyName', v);
-  // TODO(2단계): 중앙 등록부에 약국명 등록 (registerPharmacy)
-  location.reload();
+async function sha256(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(s)));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function _gv(id) { const e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+function authMsg(m) { const e = document.getElementById('auth-msg'); if (e) e.textContent = m || ''; }
+function showAuth() { document.getElementById('auth').style.display = 'flex'; authTab('login'); }
+function authTab(which) {
+  ['login','signup','reset'].forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el) el.style.display = (v === which) ? 'block' : 'none';
+  });
+  authMsg('');
+  const tl = document.getElementById('tab-login'), ts = document.getElementById('tab-signup');
+  const on = 'background:#6d5efc;color:#fff', off = 'background:#eee;color:#666';
+  const base = 'flex:1;padding:10px;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;';
+  if (tl) tl.style.cssText = base + (which === 'login' ? on : off);
+  if (ts) ts.style.cssText = base + (which === 'signup' ? on : off);
+}
+function getSession() { try { return JSON.parse(localStorage.getItem('app_session') || 'null'); } catch(e) { return null; } }
+function setSession(id, name) { localStorage.setItem('app_session', JSON.stringify({ id, name })); location.reload(); }
+function logout() { if (confirm('로그아웃 할까요?')) { localStorage.removeItem('app_session'); location.reload(); } }
+
+async function doSignup() {
+  const name = _gv('su-name'), id = _gv('su-id'), pw = _gv('su-pw');
+  if (!name || !id || !pw) { authMsg('약국명·아이디·비밀번호를 모두 입력하세요'); return; }
+  authMsg('가입 중...');
+  try {
+    const pwh = await sha256(pw);
+    const r = await jsonpFetch(`${AUTH_URL}?action=signup&id=${encodeURIComponent(id)}&pw=${pwh}&name=${encodeURIComponent(name)}`);
+    if (r && r.success) setSession(id, r.name);
+    else authMsg(r && r.message || '가입 실패');
+  } catch(e) { authMsg('통신 오류 — 다시 시도해주세요'); }
+}
+async function doLogin() {
+  const id = _gv('li-id'), pw = _gv('li-pw');
+  if (!id || !pw) { authMsg('아이디·비밀번호를 입력하세요'); return; }
+  authMsg('로그인 중...');
+  try {
+    const pwh = await sha256(pw);
+    const r = await jsonpFetch(`${AUTH_URL}?action=login&id=${encodeURIComponent(id)}&pw=${pwh}`);
+    if (r && r.success) setSession(id, r.name);
+    else authMsg(r && r.message || '로그인 실패');
+  } catch(e) { authMsg('통신 오류 — 다시 시도해주세요'); }
+}
+async function doReset() {
+  const id = _gv('rs-id'), name = _gv('rs-name'), pw = _gv('rs-pw');
+  if (!id || !name || !pw) { authMsg('모두 입력하세요'); return; }
+  authMsg('변경 중...');
+  try {
+    const pwh = await sha256(pw);
+    const r = await jsonpFetch(`${AUTH_URL}?action=resetPw&id=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}&pw=${pwh}`);
+    if (r && r.success) { authMsg(''); showToast('✅ 비밀번호가 변경됐습니다. 로그인하세요', 'ok'); authTab('login'); }
+    else authMsg(r && r.message || '재설정 실패');
+  } catch(e) { authMsg('통신 오류 — 다시 시도해주세요'); }
 }
 
 function init() {
-  // 약국명 없으면 온보딩 먼저
-  const pharmName = localStorage.getItem('app_pharmacyName');
-  if (!pharmName) { showOnboarding(); return; }
-  applyPharmacyName(pharmName);
+  // 로그인 안 됐으면 로그인 화면 먼저
+  const sess = getSession();
+  if (!sess || !sess.id) { showAuth(); return; }
+  applyPharmacyName(sess.name);
 
   goMode('in');
   updateSheetStatus();
