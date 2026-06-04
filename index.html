@@ -740,6 +740,19 @@ function authTab(which) {
 function getSession() { try { return JSON.parse(localStorage.getItem('app_session') || 'null'); } catch(e) { return null; } }
 function setSession(id, name, token, sheetId) { localStorage.setItem('app_session', JSON.stringify({ id, name, token: token || '', sheetId: sheetId || '' })); location.reload(); }
 function logout() { if (confirm('로그아웃 할까요?')) { localStorage.removeItem('app_session'); location.reload(); } }
+// 세션 만료(계정 삭제/토큰 무효) 감지 시 자동으로 로그인 화면으로
+let _expiredHandled = false;
+function checkExpired(data) {
+  if (_expiredHandled) return true;
+  if (data && data.success === false && typeof data.error === 'string' && /세션 만료|다시 로그인/.test(data.error)) {
+    _expiredHandled = true;
+    try { localStorage.removeItem('app_session'); } catch(e) {}
+    alert('세션이 만료되었습니다 (계정이 삭제되었거나 변경됨). 다시 로그인해 주세요.');
+    location.reload();
+    return true;
+  }
+  return false;
+}
 
 async function doSignup() {
   const name = _gv('su-name'), id = _gv('su-id'), pw = _gv('su-pw'), sheet = _gv('su-sheet');
@@ -838,6 +851,7 @@ async function loadAllProducts() {
   // 백그라운드에서 최신 데이터 로드
   try {
     const data = await jsonpFetch(`${sheetUrl}?action=getAll`);
+    if (checkExpired(data)) return;
     if (data && data.success && data.products) {
       allSheetProducts = data.products;
       localStorage.setItem('app_phProductCache', JSON.stringify(data.products));
@@ -2008,6 +2022,7 @@ async function commitAll(m) {
         redirect:'follow',
         body:JSON.stringify({action:'batchUpdate',records})});
       const data=await res.json(); sheetOk=data.success;
+      if(checkExpired(data)) return;
       sheetCache={};
     }catch(e){}
   }
