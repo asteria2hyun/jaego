@@ -1026,9 +1026,24 @@ function confirmScan(raw) {
 }
 
 // Android/Chromium - 네이티브 BarcodeDetector 루프 (재사용 + 동시 detect 방지)
+// 색 반전 바코드(어두운 배경+밝은 바) 대응용: 크롭 픽셀을 반전한 ImageData 반환
+function invertedImageData(srcCanvas) {
+  const ctx = srcCanvas.getContext('2d');
+  const id = ctx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+  const d = id.data;
+  for (let i = 0; i < d.length; i += 4) { d[i] = 255 - d[i]; d[i+1] = 255 - d[i+1]; d[i+2] = 255 - d[i+2]; }
+  return id;
+}
 function runDetectorLoop(video) {
   const detector = getDetector();
   let busy = false;
+  const tryConfirm = (barcodes) => {
+    if (barcodes && barcodes.length > 0) {
+      const confirmed = confirmScan(barcodes[0].rawValue);
+      if (confirmed) { if (navigator.vibrate) navigator.vibrate(60); closeCam(); addScan(confirmed, scanMode); return true; }
+    }
+    return false;
+  };
   function detect() {
     if (!isScanning) return;
     if (video.readyState < 2 || busy) { requestAnimationFrame(detect); return; }
@@ -1036,15 +1051,12 @@ function runDetectorLoop(video) {
     if (!canvas) { requestAnimationFrame(detect); return; }
     busy = true;
     detector.detect(canvas).then(barcodes => {
-      busy = false;
-      if (barcodes.length > 0) {
-        const confirmed = confirmScan(barcodes[0].rawValue);
-        if (confirmed) {
-          if (navigator.vibrate) navigator.vibrate(60);
-          closeCam(); addScan(confirmed, scanMode); return;
-        }
-      }
-      requestAnimationFrame(detect);
+      if (tryConfirm(barcodes)) { busy = false; return; }
+      detector.detect(invertedImageData(canvas)).then(inv => {
+        busy = false;
+        if (tryConfirm(inv)) return;
+        requestAnimationFrame(detect);
+      }).catch(() => { busy = false; requestAnimationFrame(detect); });
     }).catch(() => { busy = false; requestAnimationFrame(detect); });
   }
   detect();
@@ -1055,6 +1067,13 @@ const _WASM_FORMATS = ['EAN-13','EAN-8','Code128','Code39','UPC-A','UPC-E','ITF'
 function runWasmLoop(video) {
   const opts = { formats: _WASM_FORMATS, tryHarder: true, maxNumberOfSymbols: 1 };
   let busy = false;
+  const tryConfirm = (results) => {
+    if (results && results.length && results[0].text) {
+      const confirmed = confirmScan(results[0].text);
+      if (confirmed) { if (navigator.vibrate) navigator.vibrate(60); closeCam(); addScan(confirmed, scanMode); return true; }
+    }
+    return false;
+  };
   function detect() {
     if (!isScanning) return;
     if (video.readyState < 2 || busy) { requestAnimationFrame(detect); return; }
@@ -1065,15 +1084,12 @@ function runWasmLoop(video) {
     catch(e) { requestAnimationFrame(detect); return; }
     busy = true;
     ZXingWASM.readBarcodes(imgData, opts).then(results => {
-      busy = false;
-      if (results && results.length && results[0].text) {
-        const confirmed = confirmScan(results[0].text);
-        if (confirmed) {
-          if (navigator.vibrate) navigator.vibrate(60);
-          closeCam(); addScan(confirmed, scanMode); return;
-        }
-      }
-      requestAnimationFrame(detect);
+      if (tryConfirm(results)) { busy = false; return; }
+      ZXingWASM.readBarcodes(invertedImageData(canvas), opts).then(r2 => {
+        busy = false;
+        if (tryConfirm(r2)) return;
+        requestAnimationFrame(detect);
+      }).catch(() => { busy = false; requestAnimationFrame(detect); });
     }).catch(() => { busy = false; requestAnimationFrame(detect); });
   }
   detect();
