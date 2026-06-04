@@ -252,7 +252,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
       <input id="su-pw" type="password" placeholder="비밀번호" autocomplete="new-password" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;color:#222">
       <div style="margin:2px 0 8px;padding:10px;background:#f5f3ff;border-radius:10px;font-size:11.5px;line-height:1.6;color:#444">
         📋 <b>재고를 저장할 내 구글시트</b> (내 데이터는 내 시트에!)<br>
-        ① <a href="https://sheets.new" target="_blank" style="color:#6d5efc;font-weight:700">빈 시트 만들기</a> → ② 우측상단 <b>공유</b> → <b>"링크 있는 모든 사용자: 편집자"</b> → ③ 링크 복사
+        ① <a href="https://sheets.new" target="_blank" style="color:#6d5efc;font-weight:700">빈 시트 만들기</a> → ② <b>공유</b> → <b>"링크 있는 모든 사용자: 편집자"</b> → ③ 링크 복사
+        <div style="margin-top:7px"><span onclick="showSheetHelp()" style="display:inline-block;background:#6d5efc;color:#fff;font-weight:800;border-radius:7px;padding:5px 10px;cursor:pointer;font-size:12px">📖 처음이세요? 자세한 방법 보기</span></div>
       </div>
       <input id="su-sheet" placeholder="구글시트 링크 붙여넣기" autocomplete="off" onkeydown="if(event.key==='Enter')doSignup()" style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-size:14px;outline:none;color:#222">
       <button onclick="doSignup()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#6d5efc;color:#fff;font-size:15px;font-weight:800;cursor:pointer">가입하고 시작하기</button>
@@ -268,6 +269,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
     </div>
 
     <div id="auth-msg" style="min-height:16px;font-size:12px;color:#e11;text-align:center;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- 구글시트 만들기 자세한 설명 -->
+<div id="sheet-help" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:14px;font-family:var(--sans)" onclick="if(event.target===this)hideSheetHelp()">
+  <div style="background:#fff;color:#222;width:min(440px,97%);max-height:90vh;overflow:auto;border-radius:16px;padding:20px">
+    <div style="font-size:18px;font-weight:800;margin-bottom:3px">📋 내 구글시트 만들기</div>
+    <div style="font-size:12px;color:#888;margin-bottom:16px">컴퓨터가 익숙하지 않아도 하나씩 따라하면 돼요 (1분)</div>
+    <ol style="margin:0;padding-left:22px;font-size:14px;line-height:2">
+      <li><b>위의 "빈 시트 만들기"</b> 누르기 → 새 창에 빈 표가 열려요<br><span style="color:#999;font-size:12px">구글 로그인 안 돼 있으면 먼저 로그인하세요</span></li>
+      <li>열린 표의 <b>오른쪽 위 파란 "공유"</b> 버튼 누르기</li>
+      <li>이름 입력하라고 하면 아무거나 쓰고 <b>저장</b></li>
+      <li>아래쪽 <b>"일반 액세스"</b> 에서 <b>"제한됨"</b> 글자를 눌러 → <b>"링크가 있는 모든 사용자"</b> 선택</li>
+      <li>그 오른쪽 <b>"뷰어"</b> 를 눌러 → <b style="color:#e11">"편집자"</b> 로 바꾸기 ⭐</li>
+      <li>왼쪽 아래 <b>"링크 복사"</b> 누르기 → <b>완료</b></li>
+      <li>이 화면으로 돌아와 아래 빈 칸을 <b>꾹 눌러 → "붙여넣기"</b></li>
+    </ol>
+    <div style="margin-top:14px;padding:11px;background:#fff7ed;border-radius:10px;font-size:12.5px;color:#9a3412;line-height:1.6">
+      ⚠️ <b>꼭 "편집자"</b> 로 바꿔야 해요! "뷰어"로 두면 재고 저장이 안 됩니다.
+    </div>
+    <button onclick="hideSheetHelp()" style="width:100%;margin-top:16px;padding:13px;border:none;border-radius:10px;background:#6d5efc;color:#fff;font-size:15px;font-weight:800;cursor:pointer">알겠어요 👍</button>
   </div>
 </div>
 
@@ -599,6 +621,8 @@ async function sha256(s) {
 function _gv(id) { const e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
 function authMsg(m) { const e = document.getElementById('auth-msg'); if (e) e.textContent = m || ''; }
 function showAuth() { document.getElementById('auth').style.display = 'flex'; authTab('login'); }
+function showSheetHelp() { document.getElementById('sheet-help').style.display = 'flex'; }
+function hideSheetHelp() { document.getElementById('sheet-help').style.display = 'none'; }
 function authTab(which) {
   ['login','signup','reset'].forEach(v => {
     const el = document.getElementById('view-' + v);
