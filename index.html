@@ -621,7 +621,26 @@ async function sha256(s) {
 function _gv(id) { const e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
 function authMsg(m) { const e = document.getElementById('auth-msg'); if (e) e.textContent = m || ''; }
 function showAuth() { document.getElementById('auth').style.display = 'flex'; authTab('login'); }
-function showSheetHelp() { document.getElementById('sheet-help').style.display = 'flex'; }
+function showSheetHelp() {
+  const w = window.open('', 'jaegoHelp', 'width=400,height=680,scrollbars=yes,resizable=yes');
+  if (!w) { document.getElementById('sheet-help').style.display = 'flex'; return; }  // 팝업 차단 시 모달
+  w.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>구글시트 만들기</title></head><body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;margin:0;padding:18px;color:#222;background:#fff;line-height:1.5">
+    <div style="font-size:18px;font-weight:800;margin-bottom:3px">📋 내 구글시트 만들기</div>
+    <div style="font-size:12px;color:#888;margin-bottom:16px">하나씩 따라하면 돼요 (1분)</div>
+    <ol style="margin:0;padding-left:22px;font-size:14px;line-height:2">
+      <li>가입 화면의 <b>"빈 시트 만들기"</b> 누르기 → 새 창에 빈 표가 열려요<br><span style="color:#999;font-size:12px">구글 로그인 안 돼 있으면 먼저 로그인</span></li>
+      <li>열린 표의 <b>오른쪽 위 파란 "공유"</b> 버튼 누르기</li>
+      <li>이름 입력하라고 하면 아무거나 쓰고 <b>저장</b></li>
+      <li><b>"일반 액세스"</b>의 <b>"제한됨"</b>을 눌러 → <b>"링크가 있는 모든 사용자"</b> 선택</li>
+      <li>그 오른쪽 <b>"뷰어"</b>를 눌러 → <b style="color:#e11">"편집자"</b>로 바꾸기 ⭐</li>
+      <li><b>"링크 복사"</b> 누르기 → <b>완료</b></li>
+      <li>가입 화면 빈 칸에 <b>붙여넣기</b></li>
+    </ol>
+    <div style="margin-top:14px;padding:11px;background:#fff7ed;border-radius:10px;font-size:12.5px;color:#9a3412;line-height:1.6">⚠️ <b>꼭 "편집자"</b>로 바꾸세요! "뷰어"면 재고 저장이 안 됩니다.</div>
+    <button onclick="window.close()" style="width:100%;margin-top:16px;padding:13px;border:none;border-radius:10px;background:#6d5efc;color:#fff;font-size:15px;font-weight:800;cursor:pointer">닫기</button>
+  </body></html>`);
+  w.document.close();
+}
 function hideSheetHelp() { document.getElementById('sheet-help').style.display = 'none'; }
 function authTab(which) {
   ['login','signup','reset'].forEach(v => {
