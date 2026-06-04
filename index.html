@@ -347,10 +347,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
       <div class="logo-mark">💊</div>
       <div><div class="logo-name" id="logoName">약국 재고관리</div><div class="logo-sub">재고관리</div></div>
     </div>
-    <div style="display:flex;gap:7px;align-items:center">
-      <div class="sheet-pill" onclick="showManual()" style="cursor:pointer"><span>❓ 사용법</span></div>
-      <div class="sheet-pill" onclick="logout()" style="cursor:pointer"><span>↪ 로그아웃</span></div>
-    </div>
+    <div class="sheet-pill" onclick="goMode('cfg')" style="cursor:pointer"><span>⚙️ 설정</span></div>
   </div>
   <div class="tabs" style="display:none">
     <button class="tab" id="tab-in"   onclick="goMode('in')">📦 입고</button>
@@ -426,7 +423,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 <!-- SETTINGS -->
 <div class="content" id="view-cfg" style="display:none">
-  <div class="sec-label">서버 연결</div>
+  <div class="sec-label">내 데이터 · 도움말</div>
+  <div class="url-card">
+    <button onclick="openMySheet()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#059669;color:#fff;font-size:15px;font-weight:800;cursor:pointer">📊 내 구글시트(엑셀) 열기</button>
+    <button onclick="showManual()" style="width:100%;margin-top:9px;padding:12px;border:1px solid #ddd6fe;border-radius:10px;background:#f5f3ff;color:#6d5efc;font-size:14px;font-weight:800;cursor:pointer">📖 사용설명서 보기</button>
+  </div>
+  <div class="sec-label" style="margin-top:8px">서버 연결</div>
   <div class="url-card">
     <div class="url-card-title">✅ 중앙 서버에 자동 연결됨</div>
     <div style="font-size:12px;color:#888;margin-top:4px;line-height:1.5">로그인 계정 기준으로 내 구글시트와 연결됩니다. 따로 설정할 필요 없어요.</div>
@@ -442,6 +444,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
       <div class="file-status" id="fileStatus"></div>
     </div>
     <input type="file" id="fileInput" class="file-input" accept=".csv" onchange="loadBackData(event)">
+  </div>
+  <div class="sec-label" style="margin-top:8px">계정</div>
+  <div class="url-card">
+    <button onclick="logout()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#fee2e2;color:#b91c1c;font-size:14px;font-weight:800;cursor:pointer">↪ 로그아웃</button>
   </div>
 </div>
 
