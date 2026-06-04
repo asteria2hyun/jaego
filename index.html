@@ -293,14 +293,64 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   </div>
 </div>
 
+<!-- 사용설명서 -->
+<div id="manual" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);overflow-y:auto;padding:14px;font-family:var(--sans)" onclick="if(event.target===this)hideManual()">
+  <div style="background:#fff;color:#222;width:min(480px,97%);margin:0 auto;border-radius:16px;padding:20px 18px 24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:19px;font-weight:800">📖 사용설명서</div>
+      <button onclick="hideManual()" style="border:none;background:#eee;border-radius:8px;padding:6px 12px;font-size:14px;cursor:pointer">닫기 ✕</button>
+    </div>
+
+    <!-- ⭐ 엑셀(내 구글시트) 관리 — 가장 강조 -->
+    <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #6ee7b7;border-radius:14px;padding:16px;margin-bottom:18px">
+      <div style="font-size:16px;font-weight:800;color:#065f46">⭐ 엑셀로 내 재고 관리하기</div>
+      <div style="font-size:13px;color:#047857;margin:6px 0 12px;line-height:1.6">내 재고·이력 데이터는 <b>100% 내 구글시트</b>에 저장돼요. 언제든 엑셀처럼 직접 보고·고치고·내려받을 수 있습니다. <b>데이터는 온전히 약국 것!</b></div>
+      <button onclick="openMySheet()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#059669;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:12px">📊 내 구글시트(엑셀) 열기</button>
+      <div style="font-size:13px;line-height:1.9;color:#064e3b">
+        <b>📥 엑셀 파일로 내려받기</b><br>구글시트 → <b>파일 → 다운로드 → Microsoft Excel(.xlsx)</b><br><br>
+        <b>✏️ 엑셀처럼 바로 수정</b><br><b>상품</b> 탭에서 재고 숫자·상품명을 직접 고치면 앱에 반영돼요 (여러 개 한꺼번에 수정할 때 편함)<br><br>
+        <b>📤 엑셀에서 고쳐서 올리기</b><br>엑셀에서 편집 → 구글시트 <b>파일 → 가져오기</b>로 덮어쓰기
+      </div>
+      <div style="background:#fff7ed;border-radius:8px;padding:9px;margin-top:10px;font-size:11.5px;color:#9a3412;line-height:1.5">⚠️ <b>상품·이력</b> 탭의 <b>1행(제목)과 열 순서</b>는 그대로 두세요. 제목을 지우거나 순서를 바꾸면 앱이 못 읽어요.</div>
+    </div>
+
+    <div style="font-size:15px;font-weight:800;margin:0 0 6px">🚀 시작하기</div>
+    <div style="font-size:13px;line-height:1.8;color:#444;margin-bottom:16px">
+      ① <b>회원가입</b>: 약국명 + 아이디 + 비번 + 내 구글시트 링크<br>
+      &nbsp;&nbsp;(빈 시트 만들기 → 공유 → "링크 있는 모든 사용자: <b>편집자</b>" → 링크 복사)<br>
+      ② 다음부터는 <b>아이디·비번</b>으로 로그인
+    </div>
+
+    <div style="font-size:15px;font-weight:800;margin:0 0 6px">📦 입고 · 📤 출고</div>
+    <div style="font-size:13px;line-height:1.8;color:#444;margin-bottom:16px">
+      ① <b>입고/출고</b> 탭 → <b>📷 스캔</b> (또는 🔍 상품명 검색)<br>
+      ② 수량 정하기 (박스/낱개)<br>
+      ③ <b>전체 확정</b> → 구글시트에 자동 저장<br>
+      <span style="color:#888">· 처음 보는 바코드도 중앙DB에 있으면 <b>이름 자동 제안</b> → 그대로 쓰거나 수정해 등록</span>
+    </div>
+
+    <div style="font-size:15px;font-weight:800;margin:0 0 6px">🏷️ 품목 · 📋 이력 · 📊 대시보드</div>
+    <div style="font-size:13px;line-height:1.8;color:#444;margin-bottom:16px">
+      <b>품목</b>: 전체 상품·재고 검색 / <b>이력</b>: 최근 입출고 / <b>대시보드</b>: 재고주의(재고0) 한눈에
+    </div>
+
+    <div style="font-size:15px;font-weight:800;margin:0 0 6px">📱 여러 기기 · 🔑 비밀번호</div>
+    <div style="font-size:13px;line-height:1.8;color:#444">
+      · 여러 휴대폰/PC에서 <b>같은 아이디로 로그인</b>하면 데이터가 같이 보여요<br>
+      · 비번 잊으면 → 로그인 화면 <b>"비밀번호 찾기"</b> → <b>아이디 + 약국명</b> 입력
+    </div>
+  </div>
+</div>
+
 <div class="header">
   <div class="header-row">
     <div class="logo">
       <div class="logo-mark">💊</div>
       <div><div class="logo-name" id="logoName">약국 재고관리</div><div class="logo-sub">재고관리</div></div>
     </div>
-    <div class="sheet-pill" onclick="logout()" style="cursor:pointer">
-      <span>↪ 로그아웃</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <div class="sheet-pill" onclick="showManual()" style="cursor:pointer"><span>❓ 사용법</span></div>
+      <div class="sheet-pill" onclick="logout()" style="cursor:pointer"><span>↪ 로그아웃</span></div>
     </div>
   </div>
   <div class="tabs" style="display:none">
@@ -634,6 +684,15 @@ async function sha256(s) {
 function _gv(id) { const e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
 function authMsg(m) { const e = document.getElementById('auth-msg'); if (e) e.textContent = m || ''; }
 function showAuth() { document.getElementById('auth').style.display = 'flex'; authTab('login'); }
+function showManual() { document.getElementById('manual').style.display = 'block'; }
+function hideManual() { document.getElementById('manual').style.display = 'none'; }
+async function openMySheet() {
+  try {
+    const r = await jsonpFetch(`${AUTH_URL}?action=whoami`);
+    if (r && r.success && r.sheetId) window.open('https://docs.google.com/spreadsheets/d/' + r.sheetId + '/edit', '_blank');
+    else showToast('시트 정보를 불러오지 못했어요', 'err');
+  } catch(e) { showToast('통신 오류 — 다시 시도', 'err'); }
+}
 function showSheetHelp() {
   const w = window.open('', 'jaegoHelp', 'width=400,height=680,scrollbars=yes,resizable=yes');
   if (!w) { document.getElementById('sheet-help').style.display = 'flex'; return; }  // 팝업 차단 시 모달
