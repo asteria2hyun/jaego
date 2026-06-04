@@ -377,11 +377,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 <!-- SETTINGS -->
 <div class="content" id="view-cfg" style="display:none">
-  <div class="sec-label">구글 시트 연동</div>
+  <div class="sec-label">서버 연결</div>
   <div class="url-card">
-    <div class="url-card-title">📊 Apps Script 웹앱 URL</div>
-    <input class="url-input" id="urlInput" placeholder="https://script.google.com/macros/s/...">
-    <button class="url-save" onclick="saveUrl()">저장</button>
+    <div class="url-card-title">✅ 중앙 서버에 자동 연결됨</div>
+    <div style="font-size:12px;color:#888;margin-top:4px;line-height:1.5">로그인 계정 기준으로 내 구글시트와 연결됩니다. 따로 설정할 필요 없어요.</div>
+    <input id="urlInput" type="hidden">
   </div>
   <div class="sec-label" style="margin-top:8px">백데이터 파일</div>
   <div class="url-card">
@@ -504,7 +504,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 // ═══════════════════════════════════════
 // CONFIG & STATE
 // ═══════════════════════════════════════
-const DEFAULT_URL = ''; // 범용판: 중앙 백엔드 연결 전까지 비움 (사장님 데이터와 분리)
+let DEFAULT_URL = ''; // 2-D: 로그인 후 init()에서 중앙(AUTH_URL)으로 설정됨
+let TOKEN = '';       // 2-D: 로그인 세션 토큰 (모든 데이터 호출에 자동 주입)
 let mode='in', scanMode='in', isScanning=false;
 let products  = JSON.parse(localStorage.getItem('app_phProducts') || '{}');
 let histLog   = JSON.parse(localStorage.getItem('app_phHistory')  || '[]');
@@ -609,6 +610,18 @@ function getBarcodeVariants(barcode) {
 // ── 범용판: 계정(로그인/회원가입/비번찾기) ──
 const AUTH_URL = 'https://script.google.com/macros/s/AKfycbw_xpMgUldomF-XSIBk0lEO0XrfgWzWfXRBeVu1qYb5OMyj0qs1eE8VwlCf3fUKQFqdNQ/exec';
 
+// ── 2-D: 중앙(AUTH_URL)으로 가는 모든 POST에 토큰 자동 주입 ──
+(function(){
+  const _f = window.fetch.bind(window);
+  window.fetch = function(u, o){
+    if (typeof u === 'string' && AUTH_URL && u.indexOf(AUTH_URL) === 0 &&
+        o && o.method === 'POST' && typeof o.body === 'string') {
+      try { const b = JSON.parse(o.body); if (b && !b.token && TOKEN) { b.token = TOKEN; o.body = JSON.stringify(b); } } catch(e) {}
+    }
+    return _f(u, o);
+  };
+})();
+
 function applyPharmacyName(name) {
   const el = document.getElementById('logoName');
   if (el) el.textContent = name + ' 재고관리';
@@ -699,9 +712,14 @@ function init() {
   if (!sess || !sess.id) { showAuth(); return; }
   applyPharmacyName(sess.name);
 
+  // 2-D: 데이터는 전부 중앙 백엔드로, 세션 토큰으로 인증
+  TOKEN = sess.token || '';
+  DEFAULT_URL = AUTH_URL;
+  sheetUrl = AUTH_URL;
+
   goMode('in');
   updateSheetStatus();
-  if (sheetUrl) document.getElementById('urlInput').value = sheetUrl;
+  const _ui = document.getElementById('urlInput'); if (_ui) _ui.value = '';
   updateFileStatus();
   // 로컬 캐시 있으면 즉시 사용
   const cached = localStorage.getItem('app_phProductCache');
@@ -763,6 +781,10 @@ async function loadAllProducts() {
 }
 
 function jsonpFetch(url) {
+  // 2-D: 중앙 데이터 호출이면 토큰 자동 부착
+  if (url.indexOf(AUTH_URL) === 0 && url.indexOf('token=') < 0 && TOKEN) {
+    url += (url.indexOf('?') >= 0 ? '&' : '?') + 'token=' + encodeURIComponent(TOKEN);
+  }
   return new Promise((resolve, reject) => {
     const cbName = 'cb_' + Date.now();
     const script = document.createElement('script');
@@ -1285,6 +1307,17 @@ async function addScan(rawBarcode, m) {
   if (!name) {
     for (const v of variants) {
       if (backData[v]) { name=backData[v].name; source='local-file'; break; }
+    }
+  }
+
+  // 중앙 참조DB에서 이름 '제안' 받기 (내 시트엔 없지만 중앙엔 등록된 바코드)
+  // → 약국은 이 이름을 그대로 쓰거나 자기 식으로 수정 후 등록(내 시트에 생성)
+  if (!name) {
+    for (const v of [...new Set([barcode, ...variants])]) {
+      try {
+        const cd = await jsonpFetch(`${AUTH_URL}?action=lookup&barcode=${encodeURIComponent(v)}`);
+        if (cd && cd.success && cd.name) { name = cd.name; source = 'central'; foundBarcode = v; break; }
+      } catch(e){}
     }
   }
 
