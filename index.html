@@ -277,8 +277,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
       <div class="logo-mark">💊</div>
       <div><div class="logo-name" id="logoName">약국 재고관리</div><div class="logo-sub">재고관리</div></div>
     </div>
-    <div class="sheet-pill" onclick="goMode('cfg')">
-      <div class="dot" id="sheetDot"></div><span id="sheetTxt">시트 연결</span>
+    <div class="sheet-pill" onclick="logout()" style="cursor:pointer">
+      <span>↪ 로그아웃</span>
     </div>
   </div>
   <div class="tabs" style="display:none">
@@ -2058,8 +2058,8 @@ function saveUrl(){
   showToast(url?'✅ 구글 시트 연결됨':'연결 해제됨',url?'ok':'');
 }
 function updateSheetStatus(){
-  document.getElementById('sheetDot').className='dot'+(sheetUrl?' on':'');
-  document.getElementById('sheetTxt').textContent=sheetUrl?'시트 연결됨':'시트 연결';
+  const dot=document.getElementById('sheetDot'); if(dot) dot.className='dot'+(sheetUrl?' on':'');
+  const txt=document.getElementById('sheetTxt'); if(txt) txt.textContent=sheetUrl?'시트 연결됨':'시트 연결';
 }
 
 // ═══════════════════════════════════════
