@@ -328,6 +328,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
       ② 다음부터는 <b>아이디·비번</b>으로 로그인
     </div>
 
+    <div style="font-size:15px;font-weight:800;margin:0 0 6px">📲 홈 화면에 추가 (앱처럼 쓰기)</div>
+    <div style="font-size:13px;line-height:1.8;color:#444;margin-bottom:16px">
+      매번 주소 안 치고 <b>아이콘 한 번</b>으로 열려요. <b>⚙️ 설정 → 📲 홈 화면에 추가</b>, 또는:<br>
+      · <b>아이폰</b>: 사파리 아래 <b>공유</b>(□↑) → <b>"홈 화면에 추가"</b><br>
+      · <b>안드로이드</b>: 크롬 <b>⋮</b> 메뉴 → <b>"앱 설치"</b>(또는 홈 화면에 추가)
+    </div>
+
     <div style="font-size:15px;font-weight:800;margin:0 0 6px">📦 입고 · 📤 출고</div>
     <div style="font-size:13px;line-height:1.8;color:#444;margin-bottom:16px">
       ① <b>입고/출고</b> 탭 → <b>📷 스캔</b> (또는 🔍 상품명 검색)<br>
@@ -696,6 +703,9 @@ function showAuth() { document.getElementById('auth').style.display = 'flex'; au
 function showManual() { document.getElementById('manual').style.display = 'block'; }
 function hideManual() { document.getElementById('manual').style.display = 'none'; }
 // PWA 설치
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
 let _deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); _deferredPrompt = e; });
 function installApp() {
