@@ -301,17 +301,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
       <button onclick="hideManual()" style="border:none;background:#eee;border-radius:8px;padding:6px 12px;font-size:14px;cursor:pointer">닫기 ✕</button>
     </div>
 
-    <!-- ⭐ 엑셀(내 구글시트) 관리 — 가장 강조 -->
+    <!-- ⭐ 내 데이터 = 구글시트 — 가장 강조 -->
     <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #6ee7b7;border-radius:14px;padding:16px;margin-bottom:18px">
-      <div style="font-size:16px;font-weight:800;color:#065f46">⭐ 엑셀로 내 재고 관리하기</div>
-      <div style="font-size:13px;color:#047857;margin:6px 0 12px;line-height:1.6">내 재고·이력 데이터는 <b>100% 내 구글시트</b>에 저장돼요. 언제든 엑셀처럼 직접 보고·고치고·내려받을 수 있습니다. <b>데이터는 온전히 약국 것!</b></div>
-      <button onclick="openMySheet()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#059669;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:12px">📊 내 구글시트(엑셀) 열기</button>
-      <div style="font-size:13px;line-height:1.9;color:#064e3b">
-        <b>📥 엑셀 파일로 내려받기</b><br>구글시트 → <b>파일 → 다운로드 → Microsoft Excel(.xlsx)</b><br><br>
-        <b>✏️ 엑셀처럼 바로 수정</b><br><b>상품</b> 탭에서 재고 숫자·상품명을 직접 고치면 앱에 반영돼요 (여러 개 한꺼번에 수정할 때 편함)<br><br>
-        <b>📤 엑셀에서 고쳐서 올리기</b><br>엑셀에서 편집 → 구글시트 <b>파일 → 가져오기</b>로 덮어쓰기
+      <div style="font-size:16px;font-weight:800;color:#065f46">⭐ 내 데이터는 '구글시트'에 있어요 (엑셀처럼)</div>
+      <div style="font-size:13px;color:#047857;margin:6px 0 12px;line-height:1.6">재고·이력이 전부 <b>내 구글시트</b>에 저장돼요. 엑셀처럼 <b>직접 열어서 보고 고칠 수</b> 있습니다. 데이터는 온전히 약국 것!</div>
+      <button onclick="openMySheet()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#059669;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:10px">📊 내 구글시트 열기</button>
+      <div style="font-size:13px;line-height:1.8;color:#064e3b">
+        · <b>상품</b> 탭에서 재고·상품명을 고치면 앱에 바로 반영<br>
+        · 여러 개를 한꺼번에 고칠 때 편해요
       </div>
-      <div style="background:#fff7ed;border-radius:8px;padding:9px;margin-top:10px;font-size:11.5px;color:#9a3412;line-height:1.5">⚠️ <b>상품·이력</b> 탭의 <b>1행(제목)과 열 순서</b>는 그대로 두세요. 제목을 지우거나 순서를 바꾸면 앱이 못 읽어요.</div>
+      <div style="background:#fff7ed;border-radius:8px;padding:9px;margin-top:10px;font-size:11.5px;color:#9a3412;line-height:1.5">⚠️ <b>맨 윗줄(제목)</b>은 지우지 마세요.</div>
     </div>
 
     <div style="font-size:15px;font-weight:800;margin:0 0 6px">🚀 시작하기</div>
@@ -686,12 +685,15 @@ function authMsg(m) { const e = document.getElementById('auth-msg'); if (e) e.te
 function showAuth() { document.getElementById('auth').style.display = 'flex'; authTab('login'); }
 function showManual() { document.getElementById('manual').style.display = 'block'; }
 function hideManual() { document.getElementById('manual').style.display = 'none'; }
-async function openMySheet() {
-  try {
-    const r = await jsonpFetch(`${AUTH_URL}?action=whoami`);
-    if (r && r.success && r.sheetId) window.open('https://docs.google.com/spreadsheets/d/' + r.sheetId + '/edit', '_blank');
-    else showToast('시트 정보를 불러오지 못했어요', 'err');
-  } catch(e) { showToast('통신 오류 — 다시 시도', 'err'); }
+function openMySheet() {
+  // 팝업 차단 회피: 클릭 즉시 빈 창을 먼저 열고, 시트ID 받아서 주소를 채움
+  const w = window.open('about:blank', '_blank');
+  jsonpFetch(`${AUTH_URL}?action=whoami`).then(function(r) {
+    if (r && r.success && r.sheetId) {
+      const url = 'https://docs.google.com/spreadsheets/d/' + r.sheetId + '/edit';
+      if (w) w.location.href = url; else window.open(url, '_blank');
+    } else { if (w) w.close(); showToast('시트 정보를 불러오지 못했어요', 'err'); }
+  }).catch(function() { if (w) w.close(); showToast('통신 오류 — 다시 시도', 'err'); });
 }
 function showSheetHelp() {
   const w = window.open('', 'jaegoHelp', 'width=400,height=680,scrollbars=yes,resizable=yes');
