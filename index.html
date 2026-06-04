@@ -686,13 +686,16 @@ function showAuth() { document.getElementById('auth').style.display = 'flex'; au
 function showManual() { document.getElementById('manual').style.display = 'block'; }
 function hideManual() { document.getElementById('manual').style.display = 'none'; }
 function openMySheet() {
-  // 팝업 차단 회피: 클릭 즉시 빈 창을 먼저 열고, 시트ID 받아서 주소를 채움
+  const sess = getSession() || {};
+  // 세션에 시트ID가 있으면 즉시(동기) 열기 → 팝업차단 없음
+  if (sess.sheetId) { window.open('https://docs.google.com/spreadsheets/d/' + sess.sheetId + '/edit', '_blank'); return; }
+  // 폴백(시트ID 없는 옛 세션): whoami로 받아서 열기
   const w = window.open('about:blank', '_blank');
   jsonpFetch(`${AUTH_URL}?action=whoami`).then(function(r) {
     if (r && r.success && r.sheetId) {
       const url = 'https://docs.google.com/spreadsheets/d/' + r.sheetId + '/edit';
       if (w) w.location.href = url; else window.open(url, '_blank');
-    } else { if (w) w.close(); showToast('시트 정보를 불러오지 못했어요', 'err'); }
+    } else { if (w) w.close(); showToast('로그아웃 후 다시 로그인하면 열 수 있어요', 'err'); }
   }).catch(function() { if (w) w.close(); showToast('통신 오류 — 다시 시도', 'err'); });
 }
 function showSheetHelp() {
@@ -729,7 +732,7 @@ function authTab(which) {
   if (ts) ts.style.cssText = base + (which === 'signup' ? on : off);
 }
 function getSession() { try { return JSON.parse(localStorage.getItem('app_session') || 'null'); } catch(e) { return null; } }
-function setSession(id, name, token) { localStorage.setItem('app_session', JSON.stringify({ id, name, token: token || '' })); location.reload(); }
+function setSession(id, name, token, sheetId) { localStorage.setItem('app_session', JSON.stringify({ id, name, token: token || '', sheetId: sheetId || '' })); location.reload(); }
 function logout() { if (confirm('로그아웃 할까요?')) { localStorage.removeItem('app_session'); location.reload(); } }
 
 async function doSignup() {
@@ -740,7 +743,7 @@ async function doSignup() {
   try {
     const pwh = await sha256(pw);
     const r = await jsonpFetch(`${AUTH_URL}?action=signup&id=${encodeURIComponent(id)}&pw=${pwh}&name=${encodeURIComponent(name)}&url=${encodeURIComponent(sheet)}`);
-    if (r && r.success) setSession(id, r.name, r.token);
+    if (r && r.success) setSession(id, r.name, r.token, r.sheetId);
     else authMsg(r && r.message || '가입 실패');
   } catch(e) { authMsg('통신 오류 — 다시 시도해주세요'); }
 }
@@ -751,7 +754,7 @@ async function doLogin() {
   try {
     const pwh = await sha256(pw);
     const r = await jsonpFetch(`${AUTH_URL}?action=login&id=${encodeURIComponent(id)}&pw=${pwh}`);
-    if (r && r.success) setSession(id, r.name, r.token);
+    if (r && r.success) setSession(id, r.name, r.token, r.sheetId);
     else authMsg(r && r.message || '로그인 실패');
   } catch(e) { authMsg('통신 오류 — 다시 시도해주세요'); }
 }
