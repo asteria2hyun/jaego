@@ -8,6 +8,14 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>약국 재고관리</title>
+<!-- PWA: 홈 화면 추가 / 앱처럼 전체화면 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6d5efc">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="재고관리">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -430,6 +438,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   <div class="url-card">
     <button onclick="openMySheet()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#059669;color:#fff;font-size:15px;font-weight:800;cursor:pointer">📊 내 구글시트(엑셀) 열기</button>
   </div>
+  <div class="sec-label" style="margin-top:8px">앱 설치</div>
+  <div class="url-card">
+    <button onclick="installApp()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#6d5efc;color:#fff;font-size:15px;font-weight:800;cursor:pointer">📲 홈 화면에 추가</button>
+    <div style="font-size:12px;color:#888;margin-top:8px;line-height:1.5">홈 화면 아이콘으로 추가하면 매번 주소 안 치고 <b>앱처럼 한 번에</b> 열려요.</div>
+  </div>
   <div class="sec-label" style="margin-top:8px">서버 연결</div>
   <div class="url-card">
     <div class="url-card-title">✅ 중앙 서버에 자동 연결됨</div>
@@ -682,6 +695,21 @@ function authMsg(m) { const e = document.getElementById('auth-msg'); if (e) e.te
 function showAuth() { document.getElementById('auth').style.display = 'flex'; authTab('login'); }
 function showManual() { document.getElementById('manual').style.display = 'block'; }
 function hideManual() { document.getElementById('manual').style.display = 'none'; }
+// PWA 설치
+let _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); _deferredPrompt = e; });
+function installApp() {
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+    alert('이미 홈 화면 앱으로 실행 중이에요 👍'); return;
+  }
+  if (_deferredPrompt) { _deferredPrompt.prompt(); _deferredPrompt.userChoice.finally(function(){ _deferredPrompt = null; }); return; }
+  var ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/.test(ua)) {
+    alert('홈 화면에 추가 (아이폰)\n\n1. 사파리 아래쪽 "공유" 버튼 (□↑) 누르기\n2. "홈 화면에 추가" 선택\n3. "추가"');
+  } else {
+    alert('홈 화면에 추가 (안드로이드)\n\n1. 크롬 오른쪽 위 ⋮ 메뉴\n2. "앱 설치" 또는 "홈 화면에 추가"\n3. 확인');
+  }
+}
 function openMySheet() {
   const sess = getSession() || {};
   // 세션에 시트ID가 있으면 즉시(동기) 열기 → 팝업차단 없음
